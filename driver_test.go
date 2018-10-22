@@ -62,6 +62,7 @@ func TestOff(t *testing.T) {
 	luxs := Enumerate()
 	if len(luxs) == 0 {
 		t.Log("No attached devices. Aborting test.")
+		return
 	}
 
 	lux := luxs[1]
@@ -69,4 +70,34 @@ func TestOff(t *testing.T) {
 	lux.Solid(255, 255, 255)
 	time.Sleep(500 * time.Millisecond)
 	lux.Off()
+}
+
+func TestSetLED(t *testing.T) {
+	luxs := Enumerate()
+	if len(luxs) == 0 {
+		t.Log("No attached devices. Aborting test.")
+		return
+	}
+
+	lux := luxs[1]
+	defer lux.Off()
+
+	lux.SetLED(FrontAll, 255, 0, 0)
+	lux.SetLED(BackAll, 0, 255, 0)
+}
+
+func TestSetLEDs(t *testing.T) {
+	luxs := Enumerate()
+	if len(luxs) == 0 {
+		t.Log("No attached devices. Aborting test.")
+		return
+	}
+
+	lux := luxs[1]
+	defer lux.Off()
+
+	err := lux.SetLEDs([]LED{FrontAll, BackMiddle, BackTop}, 255, 0, 0)
+	if err != nil {
+		t.Error(err.Error())
+	}
 }

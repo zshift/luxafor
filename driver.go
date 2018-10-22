@@ -30,24 +30,12 @@ func Enumerate() []Luxafor {
 }
 
 // Solid turns the specified luxafor into a solid RGB color.
-func (lux *Luxafor) Solid(r, g, b uint8) (err error) {
-	info := lux.deviceInfo
-	device, err := info.Open()
-	if err != nil {
-		return errors.Wrap(err, "open lux")
-	}
-
-	defer func() { _ = device.Close() }() // Best effort.
-
-	// sets device to solid color
-	if _, err := device.Write([]byte{static, byte(All), r, g, b}); err != nil {
-		return errors.Wrap(err, "device write")
-	}
-	return nil
+func (lux Luxafor) Solid(r, g, b uint8) (err error) {
+	return lux.SetLED(All, r, g, b)
 }
 
 // SetLED sets a golux.LED to the specific RGB value.
-func (lux *Luxafor) SetLED(led LED, r, g, b uint8) (err error) {
+func (lux Luxafor) SetLED(led LED, r, g, b uint8) (err error) {
 	info := lux.deviceInfo
 	device, err := info.Open()
 	if err != nil {
@@ -63,8 +51,18 @@ func (lux *Luxafor) SetLED(led LED, r, g, b uint8) (err error) {
 	return nil
 }
 
+// SetLEDs sets multiple golux.LED to the specific RGB value.
+func (lux Luxafor) SetLEDs(leds []LED, r, g, b uint8) (err error) {
+	for _, led := range leds {
+		if err := lux.SetLED(led, r, g, b); err != nil {
+			return errors.Wrap(err, "set led")
+		}
+	}
+	return nil
+}
+
 // Off turns off the luxafor.
-func (lux *Luxafor) Off() (err error) {
+func (lux Luxafor) Off() (err error) {
 	info := lux.deviceInfo
 	device, err := info.Open()
 	if err != nil {

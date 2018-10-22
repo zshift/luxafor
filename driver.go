@@ -13,31 +13,6 @@ type Luxafor struct {
 const (
 	vendorID uint16 = 0x04d8
 	deviceID uint16 = 0xf372
-
-	static byte = 1
-	fade   byte = 2
-	strobe byte = 3
-	wave   byte = 4
-	pattrn byte = 6
-
-	luxafor     byte = 1
-	random1     byte = 2
-	random2     byte = 3
-	random3     byte = 4
-	random4     byte = 6
-	random5     byte = 7
-	police      byte = 5
-	rainbowWave byte = 8
-
-	frontTop    byte = 1
-	frontMiddle byte = 2
-	frontBottom byte = 3
-	backTop     byte = 4
-	backMiddle  byte = 5
-	backBottom  byte = 6
-	frontAll    byte = 65
-	backAll     byte = 66
-	all         byte = 255
 )
 
 // Enumerate returns a slice of attached Luxafors
@@ -58,12 +33,49 @@ func Enumerate() []Luxafor {
 func (lux *Luxafor) Solid(r, g, b uint8) (err error) {
 	info := lux.deviceInfo
 	device, err := info.Open()
-	defer func() { _ = device.Close() }() // Best effort.
 	if err != nil {
 		return errors.Wrap(err, "open lux")
 	}
 
+	defer func() { _ = device.Close() }() // Best effort.
+
 	// sets device to solid color
-	device.Write([]byte{static, all, r, g, b})
+	if _, err := device.Write([]byte{static, byte(All), r, g, b}); err != nil {
+		return errors.Wrap(err, "device write")
+	}
+	return nil
+}
+
+// SetLED sets a golux.LED to the specific RGB value.
+func (lux *Luxafor) SetLED(led LED, r, g, b uint8) (err error) {
+	info := lux.deviceInfo
+	device, err := info.Open()
+	if err != nil {
+		return errors.Wrap(err, "open lux")
+	}
+
+	defer func() { _ = device.Close() }() // Best effort.
+
+	// Sets specified LED to RGB.
+	if _, err := device.Write([]byte{static, byte(led), r, g, b}); err != nil {
+		return errors.Wrap(err, "device write")
+	}
+	return nil
+}
+
+// Off turns off the luxafor.
+func (lux *Luxafor) Off() (err error) {
+	info := lux.deviceInfo
+	device, err := info.Open()
+	if err != nil {
+		return errors.Wrap(err, "open lux")
+	}
+
+	defer func() { _ = device.Close() }() // Best effort.
+
+	// Turns off the leds.
+	if _, err := device.Write([]byte{static, byte(All), 0, 0, 0}); err != nil {
+		return errors.Wrap(err, "device write")
+	}
 	return nil
 }

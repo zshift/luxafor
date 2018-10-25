@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 
-	"github.com/zshift/golux"
+	"github.com/zshift/luxafor"
 )
 
 func main() {
-	luxs := golux.Enumerate()
+	luxs := luxafor.Enumerate()
 	if len(luxs) == 0 {
 		fmt.Println("No attached devices. Exiting")
 		return

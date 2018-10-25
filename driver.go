@@ -1,4 +1,4 @@
-package golux
+package luxafor
 
 import (
 	"github.com/karalabe/hid"
@@ -34,7 +34,7 @@ func (lux Luxafor) Solid(r, g, b uint8) (err error) {
 	return lux.SetLED(All, r, g, b)
 }
 
-// SetLED sets a golux.LED to the specific RGB value.
+// SetLED sets a luxafor.LED to the specific RGB value.
 func (lux Luxafor) SetLED(led LED, r, g, b uint8) (err error) {
 	info := lux.deviceInfo
 	device, err := info.Open()
@@ -51,7 +51,7 @@ func (lux Luxafor) SetLED(led LED, r, g, b uint8) (err error) {
 	return nil
 }
 
-// SetLEDs sets multiple golux.LED to the specific RGB value.
+// SetLEDs sets multiple luxafor.LED to the specific RGB value.
 func (lux Luxafor) SetLEDs(leds []LED, r, g, b uint8) (err error) {
 	for _, led := range leds {
 		if err := lux.SetLED(led, r, g, b); err != nil {

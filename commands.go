@@ -1,4 +1,4 @@
-package golux
+package luxafor
 
 // Commands recognized by the Luxafor.
 const (

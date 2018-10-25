@@ -1,4 +1,4 @@
-package golux
+package luxafor
 
 // Wave types available
 const (

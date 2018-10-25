@@ -75,11 +75,11 @@ func (lux Luxafor) Fade(led LED, r, g, b, speed uint8) (err error) {
 // Police look like da popo
 func (lux Luxafor) Police(loops int) (err error) {
 	for i := 0; i < loops; i++ {
-		lux.sendCommand(fade, FrontAll, 255, 0, 0, 255)
-		lux.sendCommand(fade, BackAll, 0, 0, 255, 255)
+		lux.Fade(FrontAll, 255, 0, 0, 255)
+		lux.Fade(BackAll, 0, 0, 255, 255)
 		time.Sleep(500 * time.Millisecond)
-		lux.sendCommand(fade, FrontAll, 0, 0, 255, 255)
-		lux.sendCommand(fade, BackAll, 255, 0, 0, 255)
+		lux.Fade(FrontAll, 0, 0, 255, 255)
+		lux.Fade(BackAll, 255, 0, 0, 255)
 		time.Sleep(500 * time.Millisecond)
 	}
 	return nil

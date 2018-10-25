@@ -5,6 +5,11 @@ import (
 	"time"
 )
 
+func finishTest(lux Luxafor) {
+	time.Sleep(250 * time.Millisecond)
+	lux.Off()
+}
+
 func TestEnumerate(t *testing.T) {
 	luxs := Enumerate()
 	t.Logf("Number of attached devices: %v", len(luxs))
@@ -18,16 +23,11 @@ func testSolid(t *testing.T, r, g, b uint8, color string) {
 
 	// TODO: 0 always fails. Need to investigate why.
 	lux := luxs[1]
+	defer finishTest(lux)
 
-	defer lux.Off()
-
-	err := lux.Solid(r, g, b)
-	if err != nil {
+	if err := lux.Solid(r, g, b); err != nil {
 		t.Errorf("Failed to turn solid %s.", color)
-	} else {
-		defer lux.Off()
 	}
-	time.Sleep(250 * time.Millisecond)
 }
 
 func TestWhite(t *testing.T) {
@@ -66,13 +66,12 @@ func TestOff(t *testing.T) {
 	}
 
 	lux := luxs[1]
+	defer finishTest(lux)
 
 	lux.Solid(255, 255, 255)
-	time.Sleep(500 * time.Millisecond)
-	lux.Off()
 }
 
-func TestSetLED(t *testing.T) {
+func TestSet(t *testing.T) {
 	luxs := Enumerate()
 	if len(luxs) == 0 {
 		t.Log("No attached devices. Aborting test.")
@@ -80,10 +79,11 @@ func TestSetLED(t *testing.T) {
 	}
 
 	lux := luxs[1]
-	defer lux.Off()
+	defer finishTest(lux)
 
-	lux.SetLED(FrontAll, 255, 0, 0)
-	lux.SetLED(BackAll, 0, 255, 0)
+	lux.Set(FrontAll, 255, 0, 0)
+	time.Sleep(250 * time.Millisecond)
+	lux.Set(BackAll, 0, 255, 0)
 }
 
 func TestSetLEDs(t *testing.T) {
@@ -94,10 +94,43 @@ func TestSetLEDs(t *testing.T) {
 	}
 
 	lux := luxs[1]
-	defer lux.Off()
+	defer finishTest(lux)
 
-	err := lux.SetLEDs([]LED{FrontAll, BackMiddle, BackTop}, 255, 0, 0)
-	if err != nil {
+	if err := lux.Sets([]LED{FrontAll, BackMiddle, BackTop}, 255, 0, 0); err != nil {
 		t.Error(err.Error())
 	}
+
+	time.Sleep(250 * time.Millisecond)
+
+	if err := lux.Sets([]LED{FrontMiddle, FrontBottom}, 123, 53, 98); err != nil {
+		t.Error(err.Error())
+	}
+}
+
+func TestFade(t *testing.T) {
+	luxs := Enumerate()
+	if len(luxs) == 0 {
+		t.Log("No attached devices. Aborting test.")
+		return
+	}
+
+	lux := luxs[1]
+	defer finishTest(lux)
+
+	if err := lux.Fade(FrontAll, 0, 0, 255, 255); err != nil {
+		t.Error(err.Error())
+		t.Log("asdf")
+	}
+}
+
+func TestPolice(t *testing.T) {
+	luxs := Enumerate()
+	if len(luxs) == 0 {
+		t.Log("No attached devices. Aborting test.")
+		return
+	}
+
+	lux := luxs[1]
+	defer finishTest(lux)
+	lux.Police(100)
 }

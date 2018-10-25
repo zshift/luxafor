@@ -1,6 +1,8 @@
 package luxafor
 
 import (
+	"time"
+
 	"github.com/karalabe/hid"
 	"github.com/pkg/errors"
 )
@@ -29,13 +31,7 @@ func Enumerate() []Luxafor {
 	return luxs
 }
 
-// Solid turns the specified luxafor into a solid RGB color.
-func (lux Luxafor) Solid(r, g, b uint8) (err error) {
-	return lux.SetLED(All, r, g, b)
-}
-
-// SetLED sets a luxafor.LED to the specific RGB value.
-func (lux Luxafor) SetLED(led LED, r, g, b uint8) (err error) {
+func (lux Luxafor) sendCommand(command byte, led LED, r, g, b, speed uint8) (err error) {
 	info := lux.deviceInfo
 	device, err := info.Open()
 	if err != nil {
@@ -45,18 +41,46 @@ func (lux Luxafor) SetLED(led LED, r, g, b uint8) (err error) {
 	defer func() { _ = device.Close() }() // Best effort.
 
 	// Sets specified LED to RGB.
-	if _, err := device.Write([]byte{static, byte(led), r, g, b}); err != nil {
+	if _, err := device.Write([]byte{command, byte(led), r, g, b}); err != nil {
 		return errors.Wrap(err, "device write")
 	}
 	return nil
 }
 
-// SetLEDs sets multiple luxafor.LED to the specific RGB value.
-func (lux Luxafor) SetLEDs(leds []LED, r, g, b uint8) (err error) {
+// Solid turns the specified luxafor into a solid RGB color.
+func (lux Luxafor) Solid(r, g, b uint8) (err error) {
+	return lux.Set(All, r, g, b)
+}
+
+// Set sets a golux.LED to the specific RGB value.
+func (lux Luxafor) Set(led LED, r, g, b uint8) (err error) {
+	return lux.sendCommand(static, led, r, g, b, 0) // speed isn't used
+}
+
+// Sets sets multiple golux.LED to the specific RGB value.
+func (lux Luxafor) Sets(leds []LED, r, g, b uint8) (err error) {
 	for _, led := range leds {
-		if err := lux.SetLED(led, r, g, b); err != nil {
+		if err := lux.Set(led, r, g, b); err != nil {
 			return errors.Wrap(err, "set led")
 		}
+	}
+	return nil
+}
+
+// Fade sets the led to rgb at speed.
+func (lux Luxafor) Fade(led LED, r, g, b, speed uint8) (err error) {
+	return lux.sendCommand(fade, led, r, g, b, speed)
+}
+
+// Police look like da popo
+func (lux Luxafor) Police(loops int) (err error) {
+	for i := 0; i < loops; i++ {
+		lux.sendCommand(fade, FrontAll, 255, 0, 0, 255)
+		lux.sendCommand(fade, BackAll, 0, 0, 255, 255)
+		time.Sleep(500 * time.Millisecond)
+		lux.sendCommand(fade, FrontAll, 0, 0, 255, 255)
+		lux.sendCommand(fade, BackAll, 255, 0, 0, 255)
+		time.Sleep(500 * time.Millisecond)
 	}
 	return nil
 }
